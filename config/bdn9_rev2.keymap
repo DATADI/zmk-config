@@ -7,7 +7,6 @@
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/bt.h>
 
-/* 1. 硬件配置：启用中间旋钮 */
 &mid_encoder { status = "okay"; };
 
 &sensors {
@@ -16,21 +15,26 @@
 };
 
 / {
-    /* 暂时不写 behaviors，先测试基础功能 */
+    behaviors {
+        /* 注意：节点名使用短横线，label 使用下划线 */
+        bt_5s: bt-long-press {
+            compatible = "zmk,behavior-hold-tap";
+            label = "BT_5S_CLEAR";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <5000>;
+            bindings = <&bt>, <&kp>;
+        };
+    };
 
     keymap {
         compatible = "zmk,keymap";
 
         default_layer {
-            /* * 纯净版测试：
-             * 左上角放一个普通的 A 键，
-             * 中间放播放暂停 (C_PP)，
-             * 其余全部为空 (&none)
-             */
             bindings = <
-                &kp A      &kp C_PP      &none
-                &none      &none         &none
-                &none      &none         &none
+                &none      &bt_5s BT_CLR C_PP      &none
+                &none      &none                   &none
+                &none      &none                   &none
             >;
 
             sensor-bindings = <&inc_dec_kp PAGE_DOWN PAGE_UP>;
