@@ -7,6 +7,7 @@
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/bt.h>
 
+/* 1. 硬件配置：启用中间旋钮 */
 &mid_encoder { status = "okay"; };
 
 &sensors {
@@ -16,14 +17,16 @@
 
 / {
     behaviors {
-        /* 注意：节点名使用短横线，label 使用下划线 */
-        bt_5s: bt-long-press {
-            compatible = "zmk,behavior-hold-tap";
-            label = "BT_5S_CLEAR";
-            #binding-cells = <2>;
-            flavor = "tap-preferred";
-            tapping-term-ms = <5000>;
-            bindings = <&bt>, <&kp>;
+        /* * 定义一个“双击行为” (Tap Dance)
+         * 逻辑：
+         * 按 1 下 -> 执行第 1 个动作 (播放/暂停)
+         * 按 2 下 -> 执行第 2 个动作 (清除蓝牙)
+         */
+        td_bt: tap_dance_0 {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>; /* 关键：这告诉编译器，这个行为不需要参数！ */
+            tapping-term-ms = <300>; /* 双击间隔时间 */
+            bindings = <&kp C_PP>, <&bt BT_CLR>;
         };
     };
 
@@ -31,10 +34,13 @@
         compatible = "zmk,keymap";
 
         default_layer {
+            /* * 这里的 &td_bt 不需要任何参数
+             * 编译器绝对不会报错说 "IDX_2 undeclared"
+             */
             bindings = <
-                &none      &bt_5s BT_CLR C_PP      &none
-                &none      &none                   &none
-                &none      &none                   &none
+                &none      &td_bt      &none
+                &none      &none       &none
+                &none      &none       &none
             >;
 
             sensor-bindings = <&inc_dec_kp PAGE_DOWN PAGE_UP>;
