@@ -15,35 +15,22 @@
     sensors = <&mid_encoder>;
 };
 
-/* 2. 根节点配置 */
 / {
-    /* 自定义行为必须定义在这里，不能被注释掉 */
-    behaviors {
-        /* 定义长按蓝牙功能：必须包含 #binding-cells = <2> */
-        bt_5s: bluetooth_long_press {
-            compatible = "zmk,behavior-hold-tap";
-            label = "BT_5S_CLEAR";
-            #binding-cells = <2>;  /* 关键：这行决定了它后面必须跟两个参数 */
-            flavor = "tap-preferred";
-            tapping-term-ms = <5000>;
-            bindings = <&bt>, <&kp>;
-        };
-    };
+    /* 暂时不写 behaviors，先测试基础功能 */
 
-    /* 3. 按键映射 */
     keymap {
         compatible = "zmk,keymap";
 
         default_layer {
-            /* * 这里的逻辑是：
-             * 1. &none (空)
-             * 2. &bt_5s (吃掉后面两个参数: BT_CLR 和 C_PP)
-             * 3. &none (空) -> 这实际上是编译器的 "IDX_2"
+            /* * 纯净版测试：
+             * 左上角放一个普通的 A 键，
+             * 中间放播放暂停 (C_PP)，
+             * 其余全部为空 (&none)
              */
             bindings = <
-                &none      &bt_5s BT_CLR C_PP      &none
-                &none      &none                   &none
-                &none      &none                   &none
+                &kp A      &kp C_PP      &none
+                &none      &none         &none
+                &none      &none         &none
             >;
 
             sensor-bindings = <&inc_dec_kp PAGE_DOWN PAGE_UP>;
