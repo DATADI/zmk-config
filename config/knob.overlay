@@ -1,0 +1,17 @@
+/ {
+    /* 定义唯一的编码器装置 */
+    left_encoder: encoder_left {
+        compatible = "alps,ec11";
+        a-gpios = <&gpio0 31 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>; /* 对应 P0.31 */
+        b-gpios = <&gpio0 29 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>; /* 对应 P0.29 */
+        steps = <80>; /* 这里的数值取决于你的旋钮精度，若太灵敏可改大 */
+        status = "okay";
+    };
+
+    /* 告诉 ZMK 这里的 sensor 是给 keymap 用的 */
+    sensors {
+        compatible = "zmk,keymap-sensors";
+        sensors = <&left_encoder>;
+        triggers-per-rotation = <20>;
+    };
+};
