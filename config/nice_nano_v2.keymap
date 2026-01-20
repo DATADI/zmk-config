@@ -1,0 +1,61 @@
+/* 头文件也要改一下，虽然不改也能跑，但建议删掉多余的 */
+#include <behaviors.dtsi>
+#include <dt-bindings/zmk/keys.h>
+#include <dt-bindings/zmk/bt.h>
+
+/* * ⚠️ 重要：Nice!Nano 的引脚和 STM32 不一样。
+ * 我们必须显式指定 Supermini 的引脚。
+ */
+
+/ {
+    /* 1. 旋钮引脚配置 (覆盖) */
+    mid_encoder: mid_encoder { 
+        compatible = "alps,ec11";
+        status = "okay";
+        /* 对应 Supermini 的 031 和 029 */
+        a-gpios = <&gpio0 31 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
+        b-gpios = <&gpio0 29 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
+        steps = <80>;
+    };
+
+    sensors {
+        compatible = "zmk,keymap-sensors";
+        sensors = <&mid_encoder>;
+        triggers-per-rotation = <20>;
+    };
+
+    /* 2. 按键引脚配置 (直连模式) */
+    kscan0: kscan_0 {
+        compatible = "zmk,kscan-gpio-direct";
+        /* 对应 Supermini 的 020 */
+        input-gpios = <&gpio0 20 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+        
+        /* 注意：这里去掉了 label = "KSCAN"
+           直接让 zmk,kscan-gpio-direct 生效 
+           需要在下面的 chosen 里指定
+        */
+    };
+
+    chosen {
+        zmk,kscan = &kscan0;
+    };
+
+    /* 3. 逻辑层 (保持不变) */
+    behaviors {
+        td_5tap: tap_dance_5_times {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <300>;
+            bindings = <&kp C_PP>, <&none>, <&none>, <&none>, <&bt BT_CLR>;
+        };
+    };
+
+    keymap {
+        compatible = "zmk,keymap";
+
+        default_layer {
+            bindings = < &td_5tap >;
+            sensor-bindings = <&inc_dec_kp PAGE_DOWN PAGE_UP>;
+        };
+    };
+};
