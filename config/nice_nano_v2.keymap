@@ -6,11 +6,12 @@
 #include <behaviors.dtsi>
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/bt.h>
-/* ⚠️ 新增：引入鼠标定义的头文件 */
 #include <dt-bindings/zmk/pointing.h>
 
 / {
-    /* 1. 硬件引脚约定 (保持不变) */
+    /* ==============================================
+     * 1. 硬件引脚约定 (保持不变)
+     * ============================================== */
     mid_encoder: mid_encoder { 
         compatible = "alps,ec11";
         status = "okay";
@@ -34,8 +35,24 @@
         zmk,kscan = &kscan0;
     };
 
-    /* 2. 逻辑行为定义 */
+    /* ==============================================
+     * 2. 逻辑行为定义 (Behaviors)
+     * ============================================== */
     behaviors {
+        /* * 🟢 新增：自定义滚轮行为 
+         * 顺时针 -> SCRL_DOWN (向下滚)
+         * 逆时针 -> SCRL_UP   (向上滚)
+         */
+        scroll_encoder: scroll_encoder {
+            compatible = "zmk,behavior-sensor-rotate";
+            #sensor-binding-cells = <0>;
+            /* 这里直接写死：顺时针执行什么，逆时针执行什么 */
+            bindings = <&msc SCRL_DOWN>, <&msc SCRL_UP>;
+            /* 每次触发的间隔 (毫秒)，太快了可以改大，比如 30 */
+            tap-ms = <20>; 
+        };
+
+        /* 5连击重置蓝牙 (保持不变) */
         td_5tap: tap_dance_5_times {
             compatible = "zmk,behavior-tap-dance";
             #binding-cells = <0>;
@@ -44,19 +61,19 @@
         };
     };
 
-    /* 3. 按键映射层 */
+    /* ==============================================
+     * 3. 按键映射层 (Keymap)
+     * ============================================== */
     keymap {
         compatible = "zmk,keymap";
 
         default_layer {
             bindings = < &td_5tap >;
             
-            /* * ⚠️ 修改这里：使用鼠标滚轮行为 
-             * &inc_dec_msc SCRL_DOWN SCRL_UP
-             * 第一个参数 (顺时针) -> SCRL_DOWN (向下滚)
-             * 第二个参数 (逆时针) -> SCRL_UP   (向上滚)
+            /* * ⚠️ 这里不再用 inc_dec_msc，而是用我们上面自定义的 &scroll_encoder 
+             * 因为已经在 definition 里写死了方向，这里不需要参数
              */
-            sensor-bindings = <&inc_dec_msc SCRL_DOWN SCRL_UP>;
+            sensor-bindings = <&scroll_encoder>;
         };
     };
 };
