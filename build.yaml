@@ -20,3 +20,5 @@
 ---
 include:
   - board: nice_nano_v2
+    # 强制给生成的文件起个独一无二的名字
+    artifact-name: TurnMouse_Firmware
