@@ -19,4 +19,4 @@
 #
 ---
 include:
-  - board: bdn9_rev2
+  - board: nice_nano_v2
