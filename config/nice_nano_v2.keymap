@@ -6,22 +6,19 @@
 #include <behaviors.dtsi>
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/bt.h>
-/* 必须引入鼠标和指向设备的头文件 */
 #include <dt-bindings/zmk/pointing.h>
+#include <dt-bindings/zmk/outputs.h>
 
 / {
-    /* ==============================================
-     * 1. 硬件引脚约定 (不要动)
-     * ============================================== */
+    /* 硬件引脚约定 */
     mid_encoder: mid_encoder { 
         compatible = "alps,ec11";
         status = "okay";
+        /* 这里的 31 和 29 是 Supermini 的标准引脚，如果是 Seeed XIAO 请改 28/29 */
         a-gpios = <&gpio0 31 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
         b-gpios = <&gpio0 29 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
-        /* * steps = <80>; 
-         * 这里可以调整灵敏度，如果觉得滚得太慢，可以改成 40 或 20 
-         */
-        steps = <80>;
+        /* 灵敏度设置：数字越小越灵敏 */
+        steps = <24>;
     };
 
     sensors {
@@ -39,49 +36,28 @@
         zmk,kscan = &kscan0;
     };
 
-    /* ==============================================
-     * 2. 行为定义 (Behaviors)
-     * ============================================== */
     behaviors {
-        /* * 🟢 自定义滚轮行为 (Scroll Encoder)
-         * 逻辑: 旋转时触发鼠标滚轮事件
-         */
+        /* 滚轮行为：顺时针下滚，逆时针上滚 */
         scroll_encoder: scroll_encoder {
             compatible = "zmk,behavior-sensor-rotate";
             #sensor-binding-cells = <0>;
-            
-            /* * 关键配置:
-             * 第 1 个参数 (顺时针) -> &msc SCRL_DOWN (向下滚)
-             * 第 2 个参数 (逆时针) -> &msc SCRL_UP   (向上滚)
-             */
             bindings = <&msc SCRL_DOWN>, <&msc SCRL_UP>;
-            
-            /* 连击间隔 (毫秒) - 防止滚太快卡顿 */
             tap-ms = <30>; 
         };
 
-        /* 5连击重置蓝牙 */
-        td_5tap: tap_dance_5_times {
+        /* 多功能按键：1击播放，3击切输出，5击清蓝牙 */
+        td_multi: tap_dance_actions {
             compatible = "zmk,behavior-tap-dance";
             #binding-cells = <0>;
             tapping-term-ms = <300>;
-            bindings = <&kp C_PP>, <&none>, <&none>, <&none>, <&bt BT_CLR>;
+            bindings = <&kp C_PP>, <&none>, <&out OUT_TOG>, <&none>, <&bt BT_CLR>;
         };
     };
 
-    /* ==============================================
-     * 3. 按键映射层
-     * ============================================== */
     keymap {
         compatible = "zmk,keymap";
-
         default_layer {
-            /* 按键功能：单击播放/暂停，五连击重置 */
-            bindings = < &td_5tap >;
-            
-            /* * 旋钮功能：绑定我们刚才定义的 scroll_encoder
-             * 不需要传参数，因为已经在 behaviors 里写死了
-             */
+            bindings = < &td_multi >;
             sensor-bindings = <&scroll_encoder>;
         };
     };
