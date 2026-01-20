@@ -1,47 +1,57 @@
-/* 头文件也要改一下，虽然不改也能跑，但建议删掉多余的 */
+/*
+ * Copyright (c) 2020 The ZMK Contributors
+ * SPDX-License-Identifier: MIT
+ */
+
 #include <behaviors.dtsi>
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/bt.h>
 
-/* * ⚠️ 重要：Nice!Nano 的引脚和 STM32 不一样。
- * 我们必须显式指定 Supermini 的引脚。
- */
-
 / {
-    /* 1. 旋钮引脚配置 (覆盖) */
+    /* ==============================================
+     * 1. 关键：硬件引脚约定 (Pin Definitions)
+     * 必须告诉固件你的线接在哪里！
+     * ============================================== */
+
+    /* 约定旋钮的 A/B 信号线 */
     mid_encoder: mid_encoder { 
         compatible = "alps,ec11";
         status = "okay";
-        /* 对应 Supermini 的 031 和 029 */
+        /* * gpio0 31 -> Supermini 的 031 引脚 (CLK/A)
+         * gpio0 29 -> Supermini 的 029 引脚 (DT/B)
+         * 如果旋转反了，把 31 和 29 互换即可
+         */
         a-gpios = <&gpio0 31 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
         b-gpios = <&gpio0 29 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
-        steps = <80>;
+        steps = <80>; /* 旋钮精度，觉得太灵敏可以改小，如 40 */
     };
 
+    /* 启用这个定义好的旋钮 */
     sensors {
         compatible = "zmk,keymap-sensors";
         sensors = <&mid_encoder>;
         triggers-per-rotation = <20>;
     };
 
-    /* 2. 按键引脚配置 (直连模式) */
+    /* 约定按键的信号线 (直连模式) */
     kscan0: kscan_0 {
         compatible = "zmk,kscan-gpio-direct";
-        /* 对应 Supermini 的 020 */
+        /* * gpio0 20 -> Supermini 的 020 引脚 (SW)
+         * ACTIVE_LOW 意味着按下时接地 (GND)
+         */
         input-gpios = <&gpio0 20 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
-        
-        /* 注意：这里去掉了 label = "KSCAN"
-           直接让 zmk,kscan-gpio-direct 生效 
-           需要在下面的 chosen 里指定
-        */
     };
 
+    /* 告诉 ZMK 使用我们自定义的 kscan0 扫描器 */
     chosen {
         zmk,kscan = &kscan0;
     };
 
-    /* 3. 逻辑层 (保持不变) */
+    /* ==============================================
+     * 2. 逻辑行为定义 (Tap Dance)
+     * ============================================== */
     behaviors {
+        /* 单击播放，5连击清除蓝牙 */
         td_5tap: tap_dance_5_times {
             compatible = "zmk,behavior-tap-dance";
             #binding-cells = <0>;
@@ -50,11 +60,17 @@
         };
     };
 
+    /* ==============================================
+     * 3. 按键映射层 (Keymap)
+     * ============================================== */
     keymap {
         compatible = "zmk,keymap";
 
         default_layer {
+            /* 只有一个按键，就写一个行为 */
             bindings = < &td_5tap >;
+            
+            /* 旋钮旋转触发 PageUp / PageDown */
             sensor-bindings = <&inc_dec_kp PAGE_DOWN PAGE_UP>;
         };
     };
