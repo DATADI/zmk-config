@@ -1,23 +1,15 @@
-/*
- * Copyright (c) 2020 The ZMK Contributors
- * SPDX-License-Identifier: MIT
- */
-
 #include <behaviors.dtsi>
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/bt.h>
 #include <dt-bindings/zmk/pointing.h>
-#include <dt-bindings/zmk/outputs.h>
 
 / {
-    /* 硬件引脚约定 */
     mid_encoder: mid_encoder { 
         compatible = "alps,ec11";
         status = "okay";
-        /* 这里的 31 和 29 是 Supermini 的标准引脚，如果是 Seeed XIAO 请改 28/29 */
+        /* 你的引脚定义 (保持不变) */
         a-gpios = <&gpio0 31 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
         b-gpios = <&gpio0 29 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
-        /* 灵敏度设置：数字越小越灵敏 */
         steps = <24>;
     };
 
@@ -37,7 +29,6 @@
     };
 
     behaviors {
-        /* 滚轮行为：顺时针下滚，逆时针上滚 */
         scroll_encoder: scroll_encoder {
             compatible = "zmk,behavior-sensor-rotate";
             #sensor-binding-cells = <0>;
@@ -45,12 +36,19 @@
             tap-ms = <30>; 
         };
 
-        /* 多功能按键：1击播放，3击切输出，5击清蓝牙 */
+        /* * 🎮 多击逻辑核心 (Tap Dance)
+         * ---------------------------
+         * 1 击: 左键点击 (&mkp LCLK) - 如果你想用播放暂停，改成 &kp C_PP
+         * 2 击: 切换下一个蓝牙设备 (&bt BT_NXT)
+         * 3 击: 无动作 (&none) - 防止误触
+         * 4 击: 无动作 (&none)
+         * 5 击: 清空当前蓝牙 (&bt BT_CLR)
+         */
         td_multi: tap_dance_actions {
             compatible = "zmk,behavior-tap-dance";
             #binding-cells = <0>;
-            tapping-term-ms = <300>;
-            bindings = <&kp C_PP>, <&none>, <&out OUT_TOG>, <&none>, <&bt BT_CLR>;
+            tapping-term-ms = <400>; /* 判定时间 400ms，手慢也能触发 */
+            bindings = <&mkp LCLK>, <&bt BT_NXT>, <&none>, <&none>, <&bt BT_CLR>;
         };
     };
 
