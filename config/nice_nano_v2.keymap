@@ -4,7 +4,7 @@
 #include <dt-bindings/zmk/outputs.h>
 /* ⚠️ 必须引入鼠标头文件，否则 &msc 会报错 */
 #define ZMK_POINTING_DEFAULT_MOVE_VAL 1500  // default: 600
-#define ZMK_POINTING_DEFAULT_SCRL_VAL 20    // default: 10
+#define ZMK_POINTING_DEFAULT_SCRL_VAL 500    // default: 10
 #include <dt-bindings/zmk/pointing.h>
 
 / {
@@ -45,7 +45,7 @@
             /* * 如果方向反了 (顺时针变成了上滚)，
              * 请将下面两个指令互换位置： <&msc SCRL_UP>, <&msc SCRL_DOWN>
              */
-            bindings = <&msc SCRL_DOWN(100)>, <&msc SCRL_UP(100)>;
+            bindings = <&msc SCRL_DOWN>, <&msc SCRL_UP>;
             tap-ms = <30>; 
         };
 
