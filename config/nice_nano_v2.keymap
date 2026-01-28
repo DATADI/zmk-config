@@ -45,7 +45,7 @@
             /* * 如果方向反了 (顺时针变成了上滚)，
              * 请将下面两个指令互换位置： <&msc SCRL_UP>, <&msc SCRL_DOWN>
              */
-            bindings = <&msc SCRL_DOWN>, <&msc SCRL_UP>;
+            bindings = <&msc SCRL_DOWN(100)>, <&msc SCRL_UP(100)>;
             tap-ms = <30>; 
         };
 
