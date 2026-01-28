@@ -4,7 +4,7 @@
 #include <dt-bindings/zmk/outputs.h>
 /* ⚠️ 必须引入鼠标头文件，否则 &msc 会报错 */
 #define ZMK_POINTING_DEFAULT_MOVE_VAL 1500  // default: 600
-#define ZMK_POINTING_DEFAULT_SCRL_VAL 500    // default: 10
+#define ZMK_POINTING_DEFAULT_SCRL_VAL 250    // default: 10
 #include <dt-bindings/zmk/pointing.h>
 
 / {
